@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=70.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfyui_functional"
+version = "0.0.1"
+description = "Easy functional programming and flow control within ComfyUI"
+authors = [
+  {name = "duanyll", email = "duanyll@outlook.com"}
+]
+readme = "README.md"
+license = {text = "GNU General Public License v3"}
+requires-python = ">=3.10"
+classifiers = []
+dependencies = [
+
+]
+
+
+
+[project.optional-dependencies]
+dev = [
+    "bump-my-version",
+    "coverage",  # testing
+    "mypy",  # linting
+    "pre-commit", # runs linting on commit
+    "pytest",  # testing
+    "ruff",  # linting
+]
+
+[project.urls]
+Repository = "https://github.com/duanyll/comfyui_functional"
+BugTracker = "https://github.com/duanyll/comfyui_functional/issues"
+Documentation = "https://github.com/duanyll/comfyui_functional/wiki"
+
+
+[tool.comfy]
+PublisherId = "duanyll"
+DisplayName = "ComfyUI Functional"
+Icon = ""
+Tags = []
+Repository = "https://github.com/duanyll/comfyui_functional"
+
+includes = []
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+[tool.ruff]
+# extend-exclude = ["static", "ci/templates"]
+line-length = 140
+src = ["src", "tests"]
+target-version = "py39"
+
+# Add rules to ban exec/eval
+[tool.ruff.lint]
+select = [
+    "S102",  # exec-builtin
+    "S307",  # eval-used
+    "W293",
+    "F",  # The "F" series in Ruff stands for "Pyflakes" rules, which catch various Python syntax errors and undefined names.
+    # See all rules here: https://docs.astral.sh/ruff/rules/#pyflakes-f
+]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
