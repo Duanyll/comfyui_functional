@@ -3,7 +3,7 @@ import json
 
 from comfy_execution.graph_utils import ExecutionBlocker
 
-from .utils import AnyType, Closure
+from .utils import AnyType
 
 reap_storage = {}
 
@@ -197,8 +197,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "__Sow__": "Sow",
     "__Reap__": "Reap",
     "__Inspect__": "Inspect",
-    "__InspectPassthru__": "Inspect (Passthru)",
-    "__InspectImpl__": "Inspect (Impl)",
+    "__InspectPassthru__": "[Internal] Inspect Passthru",
+    "__InspectImpl__": "[Internal] Inspect Impl",
     "Latch": "Latch",
     "Sleep": "Sleep",
 }

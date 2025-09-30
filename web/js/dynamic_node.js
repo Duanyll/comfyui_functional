@@ -46,7 +46,7 @@ const COMFY_CLASSES = [
 
 
 app.registerExtension({
-    name: 'duanyll.dynamic_input',
+    name: 'duanyll.functional.dynamic_input',
     async beforeRegisterNodeDef(nodeType, nodeData, appInstance) {
         if (!COMFY_CLASSES.includes(nodeType.comfyClass)) {
             return;

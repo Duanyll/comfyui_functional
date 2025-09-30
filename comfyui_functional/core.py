@@ -221,8 +221,8 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "__FunctionParam__": "Function Parameter",
     "__FunctionEnd__": "Function End",
-    "__CreateClosure__": "Create Closure",
-    "__IntermidiateCoroutine__": "Intermidiate Coroutine",
-    "__RecoverList__": "Recover List",
+    "__CreateClosure__": "[Internal] Create Closure",
+    "__IntermidiateCoroutine__": "[Internal] Intermidiate Coroutine",
+    "__RecoverList__": "[Internal] Recover List",
     "CallClosure": "Call Function",
 }

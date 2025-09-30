@@ -1,15 +1,15 @@
 import { app } from "/scripts/app.js";
 
 const COLOR_THEMES = {
-    function: { nodeColor: "#0F6B57", nodeBgColor: "#0D5949" },
+    core: { nodeColor: "#0F6B57", nodeBgColor: "#0D5949" },
     high_level: { nodeColor: "#2e3e57", nodeBgColor: "#4b5b73" },
     side_effect: { nodeColor: "#3e2e40", nodeBgColor: "#573647" },
 };
 
 const NODE_COLORS = {
-    "__FunctionParam__": "function",
-    "__FunctionEnd__": "function",
-    "duanyll::CallClosure": "function",
+    "__FunctionParam__": "core",
+    "__FunctionEnd__": "core",
+    "duanyll::CallClosure": "core",
 
     "duanyll::HighLevelMap": "high_level",
     "duanyll::HighLevelMapIndexed": "high_level",
@@ -42,7 +42,7 @@ function setNodeColors(node, theme) {
 }
 
 const ext = {
-    name: "duanyll.appearance",
+    name: "duanyll.functional.appearance",
 
     nodeCreated(node) {
         const nclass = node.comfyClass;
