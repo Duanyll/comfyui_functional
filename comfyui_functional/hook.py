@@ -9,10 +9,10 @@ def hook_comfyui_execution():
             reset_reap_storage()
             prompt, warnings = transform_workflow(prompt, execute_outputs)
             if warnings:
-                print("[FUNCTIONAL] Warnings during transformation:")
+                print("[FUNCTIONAL] Warnings during workflow transformation:")
                 for warning in warnings:
                     print(f" - {warning}")
             return original_execute(self, prompt, prompt_id, extra_data, execute_outputs)
         PromptExecutor.execute = hooked_execute
     except Exception as e:
-        print(f"[FUNCTIONAL] Failed to hook into ComfyUI execution: {e}")
+        print(f"[FUNCTIONAL] Failed to hook into ComfyUI execution, function nodes may not work properly: {e}")

@@ -21,7 +21,14 @@ class FunctionParam:
     CATEGORY = "duanyll/functional"
     
     def run(self, index):
-        return (ExecutionBlocker("This node is a placeholder and should never be executed. This error indicates that the `FunctionEnd` node is missing or not properly connected."),)
+        return (ExecutionBlocker(
+            "All outputs of nodes that directly or indirectly depend on the Function "
+            "Parameter node must ultimately connect to a Function End node or an Inspect "
+            "node. An output node is incorrectly connected, as it depends on the Function "
+            "Parameter node without passing through a Function End or Inspect node. To "
+            "view temporary results within the function, please use an Inspect node before "
+            "the output node. Check your node connections and try again."
+        ),)
 
 class FunctionEnd:
     @classmethod
@@ -37,7 +44,10 @@ class FunctionEnd:
     CATEGORY = "duanyll/functional"
     
     def run(self, return_value):
-        raise NotImplementedError("This node is a placeholder and should never be executed. This error indicates that the graph is not properly connected.")
+        raise NotImplementedError(
+            "The Function End node is a marker and should never be executed directly. "
+            "If you see this error, please file a bug report."
+        )
 
 class CreateClosure:
     @classmethod
@@ -91,7 +101,11 @@ class CallClosure:
 
     def run(self, closure, unique_id, **kwargs):
         if len(unique_id) > RECURISON_LIMIT:
-            raise RecursionError("Recursion limit exceeded. Possible infinite recursion detected.")
+            raise RecursionError(
+                "Function call recursion limit exceeded. Possible infinite recursion "
+                "detected. If you are intentionally using deep recursion, you can increase "
+                "the limit by editing the RECURSION_LIMIT variable in core.py."
+            )
         # kwargs: param_0, param_1, ...
         params = []
         for i in range(len(kwargs)):
@@ -136,7 +150,12 @@ class IntermidiateCoroutine:
             next_node_id = f"{base_id}_{index}"
             
             if index > COROUTINE_LIMIT:
-                raise RecursionError("Coroutine recursion limit exceeded. Possible infinite recursion detected.")
+                raise RecursionError(
+                    "Coroutine execution limit exceeded. Possible infinite loop "
+                    "detected. If you are intentionally using long-running coroutines, "
+                    "you can increase the limit by editing the COROUTINE_LIMIT variable "
+                    "in core.py."
+                )
             
             graph, output = closure.create_graph(params, caller_unique_id=unique_id)
             
@@ -170,7 +189,7 @@ class CoroutineNodeBase:
     
     def run_coroutine(self, **kwargs):
         raise NotImplementedError(
-            "Subclasses must implement the run_coroutine method."
+            "Subclasses must implement the run_coroutine method as a generator."
         )
         yield # This is just to make this function a generator
         

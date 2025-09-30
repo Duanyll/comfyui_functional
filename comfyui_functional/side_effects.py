@@ -119,7 +119,12 @@ class Inspect:
     CATEGORY = "duanyll/functional/side_effects"
     
     def run(self, signal, value):
-        return (signal, ExecutionBlocker("You should attach an output node with exactly one input to this node."))
+        return (signal, ExecutionBlocker(
+            "The second output of the Inspect node must be directly connected to an Output "
+            "node without any intermediate nodes. Additionally, the Output node can only "
+            "be connected to the Inspect node and no other nodes. Please check your node "
+            "connections and try again."
+        ))
     
     
 class InspectPassthru:
