@@ -1,0 +1,444 @@
+{
+    "id": "1a231e13-7a20-49ed-b8ff-6fcf3077b271",
+    "revision": 0,
+    "last_node_id": 15,
+    "last_link_id": 18,
+    "nodes": [
+        {
+            "id": 6,
+            "type": "PreviewAny",
+            "pos": [
+                1843.131591796875,
+                660.2372436523438
+            ],
+            "size": [
+                210,
+                88
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "source",
+                    "name": "source",
+                    "type": "*",
+                    "link": 16
+                }
+            ],
+            "outputs": [],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.59",
+                "Node name for S&R": "PreviewAny"
+            },
+            "widgets_values": []
+        },
+        {
+            "id": 9,
+            "type": "PrimitiveInt",
+            "pos": [
+                950.972412109375,
+                837.1044311523438
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "value",
+                    "name": "value",
+                    "type": "INT",
+                    "widget": {
+                        "name": "value"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        10
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.59",
+                "Node name for S&R": "PrimitiveInt"
+            },
+            "widgets_values": [
+                0,
+                "fixed"
+            ]
+        },
+        {
+            "id": 10,
+            "type": "PrimitiveInt",
+            "pos": [
+                954.0526733398438,
+                970.6965942382812
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "value",
+                    "name": "value",
+                    "type": "INT",
+                    "widget": {
+                        "name": "value"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        11
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.59",
+                "Node name for S&R": "PrimitiveInt"
+            },
+            "widgets_values": [
+                1,
+                "fixed"
+            ]
+        },
+        {
+            "id": 1,
+            "type": "__FunctionParam__",
+            "pos": [
+                777.8857421875,
+                680.6287841796875
+            ],
+            "size": [
+                270,
+                58
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "index",
+                    "name": "index",
+                    "type": "INT",
+                    "widget": {
+                        "name": "index"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        14
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "726f029e9165a1c4f549142be7bc9e946cbe8cce",
+                "Node name for S&R": "__FunctionParam__"
+            },
+            "widgets_values": [
+                0
+            ]
+        },
+        {
+            "id": 3,
+            "type": "Basic data handling: IntAdd",
+            "pos": [
+                1099.4219970703125,
+                660.4178466796875
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "int1",
+                    "name": "int1",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int1"
+                    },
+                    "link": 14
+                },
+                {
+                    "localized_name": "int2",
+                    "name": "int2",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int2"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        1
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "basic_data_handling",
+                "ver": "0.6.0",
+                "Node name for S&R": "Basic data handling: IntAdd"
+            },
+            "widgets_values": [
+                0,
+                2
+            ]
+        },
+        {
+            "id": 15,
+            "type": "duanyll::HighLevelMap",
+            "pos": [
+                1645.031005859375,
+                658.695556640625
+            ],
+            "size": [
+                140,
+                46
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "function",
+                    "name": "function",
+                    "type": "CLOSURE",
+                    "link": 17
+                },
+                {
+                    "localized_name": "items",
+                    "name": "items",
+                    "type": "LIST",
+                    "link": 18
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "LIST",
+                    "name": "LIST",
+                    "type": "LIST",
+                    "links": [
+                        16
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "722f99871c636a48e8ceac5902c6be512564ac11",
+                "Node name for S&R": "HighLevelMap"
+            }
+        },
+        {
+            "id": 2,
+            "type": "__FunctionEnd__",
+            "pos": [
+                1423.2677001953125,
+                660.0535888671875
+            ],
+            "size": [
+                169.72265625,
+                26
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "return_value",
+                    "name": "return_value",
+                    "type": "*",
+                    "link": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "CLOSURE",
+                    "name": "CLOSURE",
+                    "type": "CLOSURE",
+                    "links": [
+                        17
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "726f029e9165a1c4f549142be7bc9e946cbe8cce",
+                "Node name for S&R": "__FunctionEnd__"
+            },
+            "widgets_values": []
+        },
+        {
+            "id": 11,
+            "type": "Basic data handling: ListCreate",
+            "pos": [
+                1320.6761474609375,
+                825.45263671875
+            ],
+            "size": [
+                270,
+                106
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "item_0",
+                    "name": "item_0",
+                    "shape": 7,
+                    "type": "*",
+                    "widget": {
+                        "name": "item_0"
+                    },
+                    "link": 10
+                },
+                {
+                    "name": "item_1",
+                    "shape": 7,
+                    "type": "*",
+                    "widget": {
+                        "name": "item_1"
+                    },
+                    "link": 11
+                },
+                {
+                    "name": "item_2",
+                    "shape": 7,
+                    "type": "*",
+                    "widget": {
+                        "name": "item_2"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "LIST",
+                    "name": "LIST",
+                    "type": "LIST",
+                    "links": [
+                        18
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "basic_data_handling",
+                "ver": "0.6.0",
+                "Node name for S&R": "Basic data handling: ListCreate"
+            },
+            "widgets_values": [
+                "",
+                "",
+                ""
+            ]
+        }
+    ],
+    "links": [
+        [
+            1,
+            3,
+            0,
+            2,
+            0,
+            "*"
+        ],
+        [
+            10,
+            9,
+            0,
+            11,
+            0,
+            "*"
+        ],
+        [
+            11,
+            10,
+            0,
+            11,
+            1,
+            "*"
+        ],
+        [
+            14,
+            1,
+            0,
+            3,
+            0,
+            "INT"
+        ],
+        [
+            16,
+            15,
+            0,
+            6,
+            0,
+            "*"
+        ],
+        [
+            17,
+            2,
+            0,
+            15,
+            0,
+            "CLOSURE"
+        ],
+        [
+            18,
+            11,
+            0,
+            15,
+            1,
+            "LIST"
+        ]
+    ],
+    "groups": [],
+    "config": {},
+    "extra": {
+        "ds": {
+            "scale": 0.7400249944258275,
+            "offset": [
+                -202.07997905370507,
+                -340.0846113685979
+            ]
+        }
+    },
+    "version": 0.4
+}

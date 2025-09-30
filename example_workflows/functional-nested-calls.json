@@ -1,0 +1,569 @@
+{
+    "id": "3c6711dd-d67b-4e31-b5d7-6a9375b95f65",
+    "revision": 0,
+    "last_node_id": 10,
+    "last_link_id": 11,
+    "nodes": [
+        {
+            "id": 2,
+            "type": "__FunctionParam__",
+            "pos": [
+                1759.3746337890625,
+                103.84187316894531
+            ],
+            "size": [
+                270,
+                58
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "index",
+                    "name": "index",
+                    "type": "INT",
+                    "widget": {
+                        "name": "index"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        2
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "__FunctionParam__"
+            },
+            "widgets_values": [
+                1
+            ]
+        },
+        {
+            "id": 3,
+            "type": "Basic data handling: IntAdd",
+            "pos": [
+                2099.878173828125,
+                -1.8751139640808105
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "int1",
+                    "name": "int1",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int1"
+                    },
+                    "link": 1
+                },
+                {
+                    "localized_name": "int2",
+                    "name": "int2",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int2"
+                    },
+                    "link": 2
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        3
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "basic_data_handling",
+                "ver": "0.6.0",
+                "Node name for S&R": "Basic data handling: IntAdd"
+            },
+            "widgets_values": [
+                0,
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "type": "__FunctionParam__",
+            "pos": [
+                1751.6192626953125,
+                -16.038490295410156
+            ],
+            "size": [
+                270,
+                58
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "index",
+                    "name": "index",
+                    "type": "INT",
+                    "widget": {
+                        "name": "index"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        1,
+                        5,
+                        7
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "__FunctionParam__"
+            },
+            "widgets_values": [
+                0
+            ]
+        },
+        {
+            "id": 6,
+            "type": "Basic data handling: IntAdd",
+            "pos": [
+                2196.42041015625,
+                168.16786193847656
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "int1",
+                    "name": "int1",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int1"
+                    },
+                    "link": 5
+                },
+                {
+                    "localized_name": "int2",
+                    "name": "int2",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int2"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        6
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "basic_data_handling",
+                "ver": "0.6.0",
+                "Node name for S&R": "Basic data handling: IntAdd"
+            },
+            "widgets_values": [
+                0,
+                1
+            ]
+        },
+        {
+            "id": 4,
+            "type": "__FunctionEnd__",
+            "pos": [
+                2404.14111328125,
+                -0.5157522559165955
+            ],
+            "size": [
+                169.72265625,
+                26
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "return_value",
+                    "name": "return_value",
+                    "type": "*",
+                    "link": 3
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "CLOSURE",
+                    "name": "CLOSURE",
+                    "type": "CLOSURE",
+                    "links": [
+                        4
+                    ]
+                }
+            ],
+            "title": "Function End (x+y)",
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "__FunctionEnd__"
+            }
+        },
+        {
+            "id": 5,
+            "type": "duanyll::CallClosure",
+            "pos": [
+                2655.2783203125,
+                2.7586050033569336
+            ],
+            "size": [
+                140,
+                86
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "closure",
+                    "name": "closure",
+                    "type": "CLOSURE",
+                    "link": 4
+                },
+                {
+                    "localized_name": "param_0",
+                    "name": "param_0",
+                    "shape": 7,
+                    "type": "*",
+                    "link": 6
+                },
+                {
+                    "name": "param_1",
+                    "shape": 7,
+                    "type": "*",
+                    "link": 7
+                },
+                {
+                    "name": "param_2",
+                    "shape": 7,
+                    "type": "*",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        8
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "duanyll::CallClosure"
+            }
+        },
+        {
+            "id": 7,
+            "type": "__FunctionEnd__",
+            "pos": [
+                2856.058837890625,
+                1.066838026046753
+            ],
+            "size": [
+                169.72265625,
+                26
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "return_value",
+                    "name": "return_value",
+                    "type": "*",
+                    "link": 8
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "CLOSURE",
+                    "name": "CLOSURE",
+                    "type": "CLOSURE",
+                    "links": [
+                        9
+                    ]
+                }
+            ],
+            "title": "Function End(2x+1)",
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "__FunctionEnd__"
+            }
+        },
+        {
+            "id": 9,
+            "type": "PrimitiveInt",
+            "pos": [
+                2738.238037109375,
+                173.8584747314453
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "value",
+                    "name": "value",
+                    "type": "INT",
+                    "widget": {
+                        "name": "value"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        10
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.60",
+                "Node name for S&R": "PrimitiveInt"
+            },
+            "widgets_values": [
+                2,
+                "fixed"
+            ]
+        },
+        {
+            "id": 8,
+            "type": "duanyll::CallClosure",
+            "pos": [
+                3074.341064453125,
+                1.6472833156585693
+            ],
+            "size": [
+                140,
+                66
+            ],
+            "flags": {},
+            "order": 8,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "closure",
+                    "name": "closure",
+                    "type": "CLOSURE",
+                    "link": 9
+                },
+                {
+                    "localized_name": "param_0",
+                    "name": "param_0",
+                    "shape": 7,
+                    "type": "*",
+                    "link": 10
+                },
+                {
+                    "name": "param_1",
+                    "shape": 7,
+                    "type": "*",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        11
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "49092efa3dd7d54f7ade6f200d3d70f90509dbcc",
+                "Node name for S&R": "duanyll::CallClosure"
+            }
+        },
+        {
+            "id": 10,
+            "type": "PreviewAny",
+            "pos": [
+                3261.445068359375,
+                -0.48104894161224365
+            ],
+            "size": [
+                140,
+                76
+            ],
+            "flags": {},
+            "order": 9,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "source",
+                    "name": "source",
+                    "type": "*",
+                    "link": 11
+                }
+            ],
+            "outputs": [],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.60",
+                "Node name for S&R": "PreviewAny"
+            },
+            "widgets_values": []
+        }
+    ],
+    "links": [
+        [
+            1,
+            1,
+            0,
+            3,
+            0,
+            "INT"
+        ],
+        [
+            2,
+            2,
+            0,
+            3,
+            1,
+            "INT"
+        ],
+        [
+            3,
+            3,
+            0,
+            4,
+            0,
+            "*"
+        ],
+        [
+            4,
+            4,
+            0,
+            5,
+            0,
+            "CLOSURE"
+        ],
+        [
+            5,
+            1,
+            0,
+            6,
+            0,
+            "INT"
+        ],
+        [
+            6,
+            6,
+            0,
+            5,
+            1,
+            "*"
+        ],
+        [
+            7,
+            1,
+            0,
+            5,
+            2,
+            "*"
+        ],
+        [
+            8,
+            5,
+            0,
+            7,
+            0,
+            "*"
+        ],
+        [
+            9,
+            7,
+            0,
+            8,
+            0,
+            "CLOSURE"
+        ],
+        [
+            10,
+            9,
+            0,
+            8,
+            1,
+            "*"
+        ],
+        [
+            11,
+            8,
+            0,
+            10,
+            0,
+            "*"
+        ]
+    ],
+    "groups": [],
+    "config": {},
+    "extra": {
+        "ds": {
+            "scale": 0.7873689111517544,
+            "offset": [
+                -1038.3026670497318,
+                562.6827475989201
+            ]
+        }
+    },
+    "version": 0.4
+}

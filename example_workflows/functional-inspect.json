@@ -1,0 +1,506 @@
+{
+    "id": "515dc7a4-bee7-4fe6-b9c6-a981d6626390",
+    "revision": 0,
+    "last_node_id": 9,
+    "last_link_id": 9,
+    "nodes": [
+        {
+            "id": 1,
+            "type": "__FunctionParam__",
+            "pos": [
+                777.3466186523438,
+                129.99949645996094
+            ],
+            "size": [
+                270,
+                58
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "index",
+                    "name": "index",
+                    "type": "INT",
+                    "widget": {
+                        "name": "index"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        1
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "0a8f1d7702d32fafdec569015276d6467558c865",
+                "Node name for S&R": "__FunctionParam__"
+            },
+            "widgets_values": [
+                0
+            ],
+            "color": "#0F6B57",
+            "bgcolor": "#0D5949"
+        },
+        {
+            "id": 2,
+            "type": "Basic data handling: IntAdd",
+            "pos": [
+                1093.4178466796875,
+                110.80477905273438
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "int1",
+                    "name": "int1",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int1"
+                    },
+                    "link": 1
+                },
+                {
+                    "localized_name": "int2",
+                    "name": "int2",
+                    "type": "INT",
+                    "widget": {
+                        "name": "int2"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        2
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "basic_data_handling",
+                "ver": "0.6.0",
+                "Node name for S&R": "Basic data handling: IntAdd"
+            },
+            "widgets_values": [
+                0,
+                1
+            ]
+        },
+        {
+            "id": 3,
+            "type": "duanyll::Sleep",
+            "pos": [
+                1389.9044189453125,
+                110.42669677734375
+            ],
+            "size": [
+                270,
+                58
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "signal",
+                    "name": "signal",
+                    "type": "*",
+                    "link": 2
+                },
+                {
+                    "localized_name": "seconds",
+                    "name": "seconds",
+                    "type": "FLOAT",
+                    "widget": {
+                        "name": "seconds"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        3,
+                        4
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "0a8f1d7702d32fafdec569015276d6467558c865",
+                "Node name for S&R": "duanyll::Sleep"
+            },
+            "widgets_values": [
+                1
+            ],
+            "color": "#3e2e40",
+            "bgcolor": "#573647"
+        },
+        {
+            "id": 5,
+            "type": "PreviewAny",
+            "pos": [
+                1882.9315185546875,
+                182.97483825683594
+            ],
+            "size": [
+                210,
+                88
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "source",
+                    "name": "source",
+                    "type": "*",
+                    "link": 5
+                }
+            ],
+            "outputs": [],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.60",
+                "Node name for S&R": "PreviewAny"
+            },
+            "widgets_values": []
+        },
+        {
+            "id": 4,
+            "type": "__Inspect__",
+            "pos": [
+                1703.1640625,
+                109.91899108886719
+            ],
+            "size": [
+                140,
+                46
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "signal",
+                    "name": "signal",
+                    "type": "*",
+                    "link": 3
+                },
+                {
+                    "localized_name": "value",
+                    "name": "value",
+                    "type": "*",
+                    "link": 4
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        6
+                    ]
+                },
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        5
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "0a8f1d7702d32fafdec569015276d6467558c865",
+                "Node name for S&R": "__Inspect__"
+            },
+            "widgets_values": [],
+            "color": "#3e2e40",
+            "bgcolor": "#573647"
+        },
+        {
+            "id": 6,
+            "type": "__FunctionEnd__",
+            "pos": [
+                2073.132568359375,
+                111.12566375732422
+            ],
+            "size": [
+                169.72265625,
+                26
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "return_value",
+                    "name": "return_value",
+                    "type": "*",
+                    "link": 6
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "CLOSURE",
+                    "name": "CLOSURE",
+                    "type": "CLOSURE",
+                    "links": [
+                        7
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "0a8f1d7702d32fafdec569015276d6467558c865",
+                "Node name for S&R": "__FunctionEnd__"
+            },
+            "widgets_values": [],
+            "color": "#0F6B57",
+            "bgcolor": "#0D5949"
+        },
+        {
+            "id": 8,
+            "type": "PrimitiveInt",
+            "pos": [
+                1977.0550537109375,
+                322.062255859375
+            ],
+            "size": [
+                270,
+                82
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "value",
+                    "name": "value",
+                    "type": "INT",
+                    "widget": {
+                        "name": "value"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "INT",
+                    "name": "INT",
+                    "type": "INT",
+                    "links": [
+                        8
+                    ]
+                }
+            ],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.60",
+                "Node name for S&R": "PrimitiveInt"
+            },
+            "widgets_values": [
+                1,
+                "fixed"
+            ]
+        },
+        {
+            "id": 7,
+            "type": "duanyll::HighLevelNest",
+            "pos": [
+                2302.85791015625,
+                111.68779754638672
+            ],
+            "size": [
+                270,
+                78
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "function",
+                    "name": "function",
+                    "type": "CLOSURE",
+                    "link": 7
+                },
+                {
+                    "localized_name": "x",
+                    "name": "x",
+                    "type": "*",
+                    "link": 8
+                },
+                {
+                    "localized_name": "depth",
+                    "name": "depth",
+                    "type": "INT",
+                    "widget": {
+                        "name": "depth"
+                    },
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "localized_name": "*",
+                    "name": "*",
+                    "type": "*",
+                    "links": [
+                        9
+                    ]
+                }
+            ],
+            "properties": {
+                "aux_id": "Duanyll/duanyll_nodepack",
+                "ver": "0a8f1d7702d32fafdec569015276d6467558c865",
+                "Node name for S&R": "duanyll::HighLevelNest"
+            },
+            "widgets_values": [
+                5
+            ],
+            "color": "#2e3e57",
+            "bgcolor": "#4b5b73"
+        },
+        {
+            "id": 9,
+            "type": "PreviewAny",
+            "pos": [
+                2620.037841796875,
+                111.22029113769531
+            ],
+            "size": [
+                210,
+                88
+            ],
+            "flags": {},
+            "order": 8,
+            "mode": 0,
+            "inputs": [
+                {
+                    "localized_name": "source",
+                    "name": "source",
+                    "type": "*",
+                    "link": 9
+                }
+            ],
+            "outputs": [],
+            "properties": {
+                "cnr_id": "comfy-core",
+                "ver": "0.3.60",
+                "Node name for S&R": "PreviewAny"
+            },
+            "widgets_values": []
+        }
+    ],
+    "links": [
+        [
+            1,
+            1,
+            0,
+            2,
+            0,
+            "INT"
+        ],
+        [
+            2,
+            2,
+            0,
+            3,
+            0,
+            "*"
+        ],
+        [
+            3,
+            3,
+            0,
+            4,
+            0,
+            "*"
+        ],
+        [
+            4,
+            3,
+            0,
+            4,
+            1,
+            "*"
+        ],
+        [
+            5,
+            4,
+            1,
+            5,
+            0,
+            "*"
+        ],
+        [
+            6,
+            4,
+            0,
+            6,
+            0,
+            "*"
+        ],
+        [
+            7,
+            6,
+            0,
+            7,
+            0,
+            "CLOSURE"
+        ],
+        [
+            8,
+            8,
+            0,
+            7,
+            1,
+            "*"
+        ],
+        [
+            9,
+            7,
+            0,
+            9,
+            0,
+            "*"
+        ]
+    ],
+    "groups": [],
+    "config": {},
+    "extra": {
+        "ds": {
+            "scale": 0.5732865455160856,
+            "offset": [
+                -563.0894309762537,
+                465.29377573044565
+            ]
+        }
+    },
+    "version": 0.4
+}
