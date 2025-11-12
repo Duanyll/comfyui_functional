@@ -2,7 +2,7 @@ import json
 
 from comfy_execution.graph_utils import ExecutionBlocker
 
-from .utils import AnyType, ContainsDynamicDict, Closure
+from .utils import AnyType, ContainsDynamicDict, Closure, create_graph_from_closure
 
 RECURISON_LIMIT = 50
 COROUTINE_LIMIT = 100
@@ -76,7 +76,7 @@ class CreateClosure:
             captures.append(kwargs[f"capture_{i}"])
         body = json.loads(body)
         output = json.loads(output)
-        return (Closure(body, output, captures), )
+        return (Closure(body=body, output=output, captures=captures), )
 
 class CallClosure:
     @classmethod
@@ -110,7 +110,7 @@ class CallClosure:
         params = []
         for i in range(len(kwargs)):
             params.append(kwargs[f"param_{i}"])
-        graph, output = closure.create_graph(params, caller_unique_id=unique_id)
+        graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
         if len(graph) == 0:
             return (output, )
         return {
@@ -156,9 +156,9 @@ class IntermidiateCoroutine:
                     "you can increase the limit by editing the COROUTINE_LIMIT variable "
                     "in core.py."
                 )
-            
-            graph, output = closure.create_graph(params, caller_unique_id=unique_id)
-            
+
+            graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
+
             if len(graph) == 0:
                 return_value = output
         
