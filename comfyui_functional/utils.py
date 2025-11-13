@@ -6,6 +6,7 @@ import base64
 import numpy as np
 import torch
 from PIL import Image
+import torch.multiprocessing as mp
 
 class AnyType(str):
     def __ne__(self, __value: object) -> bool:
@@ -97,7 +98,7 @@ def create_graph_from_closure(closure: Closure, params, caller_unique_id=None):
     return graph, output
     
     
-def create_remote_workflow_from_closure(closure, params):
+def create_remote_workflow_from_closure(closure, params, use_shared_memory=False):
     body = copy.deepcopy(closure["body"])
     graph = {}
 
@@ -125,7 +126,7 @@ def create_remote_workflow_from_closure(closure, params):
             value = closure["captures"][spec[1]]
         
         try:
-            serialized_value = serialize(value)
+            serialized_value, _ = serialize(value, use_shared_memory=use_shared_memory)
             graph[deserialize_node_id] = {
                 "inputs": {
                     "data": serialized_value,
@@ -158,6 +159,7 @@ def create_remote_workflow_from_closure(closure, params):
     graph["__output__"] = {
         "inputs": {
             "data": output,
+            "use_shared_memory": use_shared_memory
         },
         "class_type": "__Serialize__",
         "_meta": {
@@ -168,6 +170,11 @@ def create_remote_workflow_from_closure(closure, params):
     return graph
 
 class WhitelistEncoder(json.JSONEncoder):
+    def __init__(self, use_shared_memory=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.use_shared_memory = use_shared_memory
+        self.shared_tensors = set()
+
     def default(self, obj):
         # 区分 set 和 tuple
         if isinstance(obj, set):
@@ -187,12 +194,32 @@ class WhitelistEncoder(json.JSONEncoder):
             }
 
         if isinstance(obj, torch.Tensor):
-            buffer = io.BytesIO()
-            torch.save(obj.cpu(), buffer)
-            return {
-                '__type__': 'torch.Tensor',
-                'data': base64.b64encode(buffer.getvalue()).decode('utf-8')
-            }
+            obj = obj.cpu().contiguous()
+            if self.use_shared_memory:
+                # 启用共享内存优化
+                obj.share_memory_()  # 确保移动到共享内存
+                storage = obj.untyped_storage()
+                manager_handle_bytes, handle_bytes, storage_size = storage._share_filename_cpu_()
+                self.shared_tensors.add(obj)
+                return {
+                    '__type__': 'torch.Tensor_shared',
+                    'manager_handle': manager_handle_bytes.decode('utf-8'),
+                    'handle': handle_bytes.decode('utf-8'),
+                    'storage_size': storage_size,
+                    'offset': obj.storage_offset(),
+                    'shape': list(obj.shape),
+                    'strides': list(obj.stride()),
+                    'dtype': str(obj.dtype),
+                    'requires_grad': obj.requires_grad
+                }
+            else:
+                # 普通序列化（回退）
+                buffer = io.BytesIO()
+                torch.save(obj, buffer)  # 确保 CPU
+                return {
+                    '__type__': 'torch.Tensor',
+                    'data': base64.b64encode(buffer.getvalue()).decode('utf-8')
+                }
 
         if isinstance(obj, Image.Image):
             buffer = io.BytesIO()
@@ -208,14 +235,13 @@ class WhitelistEncoder(json.JSONEncoder):
             "torch.Tensor, and PIL.Image are allowed."
         )
 
-# 2. 自定义解码器 (Deserialization)
 def whitelist_decoder(dct):
     """
     用于 json.load/loads 的 object_hook，用于恢复自定义类型。
     """
     if '__type__' in dct:
         obj_type = dct['__type__']
-        data = dct['data']
+        data = dct.get('data')
 
         if obj_type == 'set':
             return set(data)
@@ -226,29 +252,49 @@ def whitelist_decoder(dct):
 
         if obj_type == 'numpy.ndarray':
             buffer = io.BytesIO(base64.b64decode(data))
-            # allow_pickle=True 是为了恢复可能包含的复杂dtype
             return np.load(buffer, allow_pickle=True) 
 
         if obj_type == 'torch.Tensor':
             buffer = io.BytesIO(base64.b64decode(data))
             return torch.load(buffer)
 
+        if obj_type == 'torch.Tensor_shared':
+            # 重建共享 Tensor
+            manager_handle_bytes = dct['manager_handle'].encode('utf-8')
+            handle_bytes = dct['handle'].encode('utf-8')
+            storage_size = dct['storage_size']
+            offset = dct['offset']
+            shape = tuple(dct['shape'])
+            strides = tuple(dct['strides'])
+            dtype_str = dct['dtype'].split('.')[-1]  # 如 'float32'
+            dtype = getattr(torch, dtype_str)
+            requires_grad = dct['requires_grad']
+            
+            # 重建存储（attach 到共享内存）
+            storage = torch.UntypedStorage._new_shared_filename_cpu(
+                manager_handle_bytes, handle_bytes, storage_size
+            )
+            
+            # 创建 Tensor 视图
+            tensor = torch.empty(shape, dtype=dtype).set_(storage, offset, shape, strides)
+            tensor.requires_grad_(requires_grad)
+            return tensor
+
         if obj_type == 'PIL.Image':
             buffer = io.BytesIO(base64.b64decode(data))
             img = Image.open(buffer)
-            # .copy() 是个好习惯，确保数据已从缓冲区完全加载
             return img.copy() 
             
     return dct
 
-
-def serialize(obj):
+def serialize(obj, use_shared_memory=False):
     """
     将对象序列化为 JSON 字符串。
     仅支持基本类型、set、tuple、bytes、numpy.ndarray、torch.Tensor 和 PIL.Image。
+    use_shared_memory: 如果为 True，且 obj 是 CPU torch.Tensor，则使用共享内存优化（传输元数据）。
     """
-    return json.dumps(obj, cls=WhitelistEncoder)
-
+    encoder = WhitelistEncoder(use_shared_memory=use_shared_memory)
+    return encoder.encode(obj), encoder.shared_tensors
 
 def deserialize(json_str):
     """

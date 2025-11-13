@@ -190,7 +190,7 @@ class ComfyClient:
                         if data.get('prompt_id') != prompt_id:
                             continue
                         
-                        print(f"[*] 收到消息: {msg_type} - {data.get('display_node', '')}")
+                        # print(f"[*] 收到消息: {msg_type} - {data.get('display_node', '')}")
 
                         if msg_type == 'execution_error':
                             raise WorkflowExecutionError(
