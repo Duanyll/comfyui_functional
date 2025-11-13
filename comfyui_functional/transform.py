@@ -108,10 +108,15 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
     """转换单个 __FunctionEnd__ 节点及其关联的子图。"""
     subgraph_nodes = _find_function_subgraph(end_node_id, graph)
     original_end_node = workflow[end_node_id]
+    enable_capture = original_end_node["inputs"].get("capture", True)
     
-    param_nodes = _find_param_nodes(subgraph_nodes, workflow, graph)
-    param_nodes.add(end_node_id)
-    capture_nodes = subgraph_nodes - param_nodes
+    if enable_capture:
+        param_nodes = _find_param_nodes(subgraph_nodes, workflow, graph)
+        param_nodes.add(end_node_id)
+        capture_nodes = subgraph_nodes - param_nodes
+    else:
+        param_nodes = subgraph_nodes
+        capture_nodes = set()
 
     # 恢复原始节点类型以便深拷贝
     workflow[end_node_id]["class_type"] = original_end_node["class_type"]

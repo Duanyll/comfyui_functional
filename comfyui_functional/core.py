@@ -7,6 +7,7 @@ from .utils import AnyType, ContainsDynamicDict, Closure, create_graph_from_clos
 RECURISON_LIMIT = 50
 COROUTINE_LIMIT = 100
 
+
 class FunctionParam:
     @classmethod
     def INPUT_TYPES(cls):
@@ -19,16 +20,19 @@ class FunctionParam:
     RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional"
-    
+
     def run(self, index):
-        return (ExecutionBlocker(
-            "All outputs of nodes that directly or indirectly depend on the Function "
-            "Parameter node must ultimately connect to a Function End node or an Inspect "
-            "node. An output node is incorrectly connected, as it depends on the Function "
-            "Parameter node without passing through a Function End or Inspect node. To "
-            "view temporary results within the function, please use an Inspect node before "
-            "the output node. Check your node connections and try again."
-        ),)
+        return (
+            ExecutionBlocker(
+                "All outputs of nodes that directly or indirectly depend on the Function "
+                "Parameter node must ultimately connect to a Function End node or an Inspect "
+                "node. An output node is incorrectly connected, as it depends on the Function "
+                "Parameter node without passing through a Function End or Inspect node. To "
+                "view temporary results within the function, please use an Inspect node before "
+                "the output node. Check your node connections and try again."
+            ),
+        )
+
 
 class FunctionEnd:
     @classmethod
@@ -36,27 +40,29 @@ class FunctionEnd:
         return {
             "required": {
                 "return_value": (AnyType("*"),),
+                "capture": ("BOOLEAN", {"default": True}),
             },
         }
-        
-    RETURN_TYPES = ("CLOSURE", )
+
+    RETURN_TYPES = ("CLOSURE",)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional"
-    
-    def run(self, return_value):
+
+    def run(self, return_value, capture):
         raise NotImplementedError(
             "The Function End node is a marker and should never be executed directly. "
             "If you see this error, please file a bug report."
         )
+
 
 class CreateClosure:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "body": ("STRING", {"multiline": True} ),
-                "output": ("STRING", ),
-                "side_effects": ("FLOAT", )
+                "body": ("STRING", {"multiline": True}),
+                "output": ("STRING",),
+                "side_effects": ("FLOAT",),
             },
             "optional": ContainsDynamicDict(
                 {
@@ -65,7 +71,7 @@ class CreateClosure:
             ),
         }
 
-    RETURN_TYPES = ("CLOSURE", )
+    RETURN_TYPES = ("CLOSURE",)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/internal"
 
@@ -76,7 +82,14 @@ class CreateClosure:
             captures.append(kwargs[f"capture_{i}"])
         body = json.loads(body)
         output = json.loads(output)
-        return (Closure(body=body, output=output, captures=captures), )
+        return (
+            Closure(
+                body=body,
+                output=output,
+                captures=captures,
+            ),
+        )
+
 
 class CallClosure:
     @classmethod
@@ -90,12 +103,10 @@ class CallClosure:
                     "param_0": (AnyType("*"), {"_dynamic": "number"}),
                 }
             ),
-            "hidden": {
-                "unique_id": "UNIQUE_ID"
-            },
+            "hidden": {"unique_id": "UNIQUE_ID"},
         }
 
-    RETURN_TYPES = (AnyType("*"), )
+    RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional"
 
@@ -110,15 +121,14 @@ class CallClosure:
         params = []
         for i in range(len(kwargs)):
             params.append(kwargs[f"param_{i}"])
-        graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
+        graph, output = create_graph_from_closure(
+            closure, params, caller_unique_id=unique_id
+        )
         if len(graph) == 0:
-            return (output, )
-        return {
-            "result": (output, ),
-            "expand": graph
-        }
-        
-          
+            return (output,)
+        return {"result": (output,), "expand": graph}
+
+
 class IntermidiateCoroutine:
     @classmethod
     def INPUT_TYPES(cls):
@@ -127,28 +137,26 @@ class IntermidiateCoroutine:
                 "return_value": (AnyType("*"),),
                 "coroutine": (AnyType("*"),),
             },
-            "hidden": {
-                "unique_id": "UNIQUE_ID"
-            },
+            "hidden": {"unique_id": "UNIQUE_ID"},
         }
-    
-    RETURN_TYPES = (AnyType("*"), )
+
+    RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/internal"
-    
+
     def run(self, return_value, coroutine, unique_id):
         (base_id, index) = unique_id.rsplit("_", 1)
         graph = {}
-        
+
         while len(graph) == 0:
             try:
                 (closure, params) = coroutine.send(return_value)
             except StopIteration as e:
-                return (e.value, )
-            
+                return (e.value,)
+
             index = int(index) + 1
             next_node_id = f"{base_id}_{index}"
-            
+
             if index > COROUTINE_LIMIT:
                 raise RecursionError(
                     "Coroutine execution limit exceeded. Possible infinite loop "
@@ -157,13 +165,15 @@ class IntermidiateCoroutine:
                     "in core.py."
                 )
 
-            graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
+            graph, output = create_graph_from_closure(
+                closure, params, caller_unique_id=unique_id
+            )
 
             if len(graph) == 0:
                 return_value = output
-        
+
         return {
-            "result": ([next_node_id, 0], ),
+            "result": ([next_node_id, 0],),
             "expand": {
                 **graph,
                 next_node_id: {
@@ -172,33 +182,33 @@ class IntermidiateCoroutine:
                         "coroutine": coroutine,
                     },
                     "class_type": "__IntermidiateCoroutine__",
-                }
-            }
+                },
+            },
         }
-                
-            
+
+
 class CoroutineNodeBase:
     @classmethod
     def INPUT_TYPES(cls):
         raise NotImplementedError(
             "This is an abstract base class and should not be instantiated directly."
         )
-        
-    RETURN_TYPES = (AnyType("*"), )
+
+    RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
-    
+
     def run_coroutine(self, **kwargs):
         raise NotImplementedError(
             "Subclasses must implement the run_coroutine method as a generator."
         )
-        yield # This is just to make this function a generator
-        
+        yield  # This is just to make this function a generator
+
     def run(self, unique_id, **kwargs):
         if isinstance(unique_id, list):
             unique_id = unique_id[0]
         coroutine = self.run_coroutine(**kwargs)
         return {
-            "result": ([f"{unique_id}_0", 0], ),
+            "result": ([f"{unique_id}_0", 0],),
             "expand": {
                 f"{unique_id}_0": {
                     "inputs": {
@@ -207,20 +217,20 @@ class CoroutineNodeBase:
                     },
                     "class_type": "__IntermidiateCoroutine__",
                 }
-            }
+            },
         }
-        
+
 
 class RecoverList:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "values": (AnyType("*"), ),
+                "values": (AnyType("*"),),
             },
         }
 
-    RETURN_TYPES = (AnyType("*"), )
+    RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/internal"
 
