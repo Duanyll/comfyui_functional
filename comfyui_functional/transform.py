@@ -49,7 +49,7 @@ class WorkflowGraph:
         """使用 Kahn 算法进行拓扑排序。返回排序后的节点列表和是否成功的标志。"""
         sorted_nodes = []
         q = deque([node_id for node_id, degree in self.in_degree.items() if degree == 0])
-        
+
         temp_in_degree = self.in_degree.copy()
 
         while q:
@@ -59,7 +59,7 @@ class WorkflowGraph:
                 temp_in_degree[v] -= 1
                 if temp_in_degree[v] == 0:
                     q.append(v)
-        
+
         is_valid = len(sorted_nodes) == len(self.workflow)
         return sorted_nodes, is_valid
 
@@ -83,12 +83,8 @@ def _find_function_subgraph(end_node_id: str, graph: WorkflowGraph) -> Set[str]:
     return subgraph_nodes
 
 
-def _find_param_nodes(
-    subgraph_nodes: Set[str], workflow: Dict, graph: WorkflowGraph
-) -> Tuple[Set[str], Set[str]]:
-    param_source_nodes = {
-        n for n in subgraph_nodes if workflow[n].get("class_type") == "__FunctionParam__"
-    }
+def _find_param_nodes(subgraph_nodes: Set[str], workflow: Dict, graph: WorkflowGraph) -> Tuple[Set[str], Set[str]]:
+    param_source_nodes = {n for n in subgraph_nodes if workflow[n].get("class_type") == "__FunctionParam__"}
 
     param_nodes = set()
     q = deque(list(param_source_nodes))
@@ -109,7 +105,7 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
     subgraph_nodes = _find_function_subgraph(end_node_id, graph)
     original_end_node = workflow[end_node_id]
     enable_capture = original_end_node["inputs"].get("capture", True)
-    
+
     if enable_capture:
         param_nodes = _find_param_nodes(subgraph_nodes, workflow, graph)
         param_nodes.add(end_node_id)
@@ -138,15 +134,15 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
             continue
         if workflow[p_node_id]["class_type"] in SIDE_EFFECT_NODES:
             has_side_effects = True
-        
+
         node_copy = copy.deepcopy(workflow[p_node_id])
-        
+
         for input_name, input_link in list(node_copy.get("inputs", {}).items()):
             if not (isinstance(input_link, list) and len(input_link) == 2):
                 continue
 
             source_id_str = str(input_link[0])
-            
+
             if source_id_str in capture_nodes:
                 source_id, source_idx = source_id_str, input_link[1]
                 edge_tuple = (source_id, source_idx)
@@ -156,7 +152,7 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
                     closure_node["inputs"][f"capture_{capture_counter}"] = [source_id, source_idx]
                     graph.add_edge(source_id, end_node_id)
                     capture_counter += 1
-                
+
                 capture_id = capture_edge_map[edge_tuple]
                 node_copy["inputs"][input_name] = ["__capture", capture_id]
 
@@ -164,11 +160,11 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
                 param_node = workflow[source_id_str]
                 param_index = param_node["inputs"].get("index", 0)
                 node_copy["inputs"][input_name] = ["__param", param_index]
-        
+
         param_subgraph_copy[p_node_id] = node_copy
 
     output_edge = param_subgraph_copy[end_node_id]["inputs"].get("return_value")
-    closure_node["inputs"]["output"] = json.dumps(output_edge) 
+    closure_node["inputs"]["output"] = json.dumps(output_edge)
     del param_subgraph_copy[end_node_id]
     closure_node["inputs"]["body"] = json.dumps(param_subgraph_copy)
     closure_node["inputs"]["side_effects"] = float("NaN") if has_side_effects else 0.0
@@ -179,6 +175,7 @@ def _transform_single_function(end_node_id: str, workflow: Dict, graph: Workflow
             source_id = str(return_link[0])
             graph.remove_edge(source_id, end_node_id)
         del closure_node["inputs"]["return_value"]
+
 
 def _prune_unreachable_nodes(workflow: Dict, leaf_nodes: Set[str]) -> Dict:
     """从叶子节点回溯，移除所有不可达的节点。"""
@@ -198,11 +195,8 @@ def _prune_unreachable_nodes(workflow: Dict, leaf_nodes: Set[str]) -> Dict:
                         visited.add(pred_id)
                         q.append(pred_id)
 
-    return {
-        node_id: node_data
-        for node_id, node_data in workflow.items()
-        if node_id in reachable_nodes
-    }
+    return {node_id: node_data for node_id, node_data in workflow.items() if node_id in reachable_nodes}
+
 
 def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
     """
@@ -213,7 +207,7 @@ def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
     """
     temp_graph = WorkflowGraph(workflow)
     leaf_nodes = temp_graph.get_leaf_nodes()
-    
+
     nodes_to_remove = set()
     modified_inspect_nodes: Dict[str, Dict] = {}
 
@@ -223,7 +217,7 @@ def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
         if len(parents) == 1:
             parent_id = parents[0]
             parent_node = workflow.get(parent_id)
-            
+
             if not (parent_node and parent_node.get("class_type") == "__Inspect__"):
                 continue
 
@@ -231,12 +225,10 @@ def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
             is_connected_to_value_output = False
             leaf_node = workflow[leaf_id]
             for input_link in leaf_node.get("inputs", {}).values():
-                if (isinstance(input_link, list) and 
-                        str(input_link[0]) == parent_id and 
-                        input_link[1] == 1):
+                if isinstance(input_link, list) and str(input_link[0]) == parent_id and input_link[1] == 1:
                     is_connected_to_value_output = True
                     break
-            
+
             # 如果不是连接到 value 输出，则跳过此叶子节点
             if not is_connected_to_value_output:
                 continue
@@ -244,21 +236,18 @@ def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
             # --- 确认无误后，开始转换逻辑 ---
             if parent_id not in modified_inspect_nodes:
                 modified_inspect_nodes[parent_id] = {}
-            
+
             body = modified_inspect_nodes[parent_id]
             leaf_node_copy = copy.deepcopy(leaf_node)
-            
+
             # 查找并替换来自父节点的输入边
             for input_name, input_link in leaf_node_copy.get("inputs", {}).items():
-                if (isinstance(input_link, list) and 
-                        str(input_link[0]) == parent_id and 
-                        input_link[1] == 1):
+                if isinstance(input_link, list) and str(input_link[0]) == parent_id and input_link[1] == 1:
                     leaf_node_copy["inputs"][input_name] = ["__value", 0]
                     break
-            
+
             body[leaf_id] = leaf_node_copy
             nodes_to_remove.add(leaf_id)
-
 
     # 将更改应用到工作流
     # 1. 更新被修改的 __Inspect__ 节点
@@ -274,12 +263,12 @@ def _preprocess_inspect_nodes(workflow: Dict, execute_outputs: list[str]):
         # Remove from execute_outputs if present
         if node_id in execute_outputs:
             execute_outputs.remove(node_id)
-            
+
 
 def transform_workflow(workflow: dict, execute_outputs: list[str]) -> tuple[dict, list]:
     """
     根据指定算法变换 ComfyUI 工作流。
-    此算法首先预处理 __Inspect__ 节点以支持动态输出，然后将由 
+    此算法首先预处理 __Inspect__ 节点以支持动态输出，然后将由
     __FunctionParam__ 和 __FunctionEnd__ 定义的函数子图转换为一个 __CreateClosure__ 节点。
 
     Args:
@@ -293,17 +282,17 @@ def transform_workflow(workflow: dict, execute_outputs: list[str]) -> tuple[dict
     warnings = []
     workflow_og = workflow
     workflow = copy.deepcopy(workflow_og)
-    
+
     # 步骤 2: 预处理 __Inspect__ 节点
     _preprocess_inspect_nodes(workflow, execute_outputs)
-    
+
     # 步骤 3: 从可能已修改的工作流重建图结构以进行后续操作
     graph = WorkflowGraph(workflow)
     sorted_nodes, is_valid_dag = graph.topological_sort()
     if not is_valid_dag:
         warnings.append("Warning: The workflow contains cycles and cannot be fully sorted topologically.")
         return workflow_og, warnings
-    
+
     # 在函数变换之前，确定最终用于剪枝的叶子节点集合
     leaf_nodes_for_pruning = graph.get_leaf_nodes()
 
@@ -319,12 +308,10 @@ def transform_workflow(workflow: dict, execute_outputs: list[str]) -> tuple[dict
     for node_id, node_data in pruned_workflow.items():
         if node_data.get("class_type") == "__FunctionParam__":
             warnings.append(
-                f"Warning: __FunctionParam__ node '{node_id}' remains in the workflow. "
-                "This indicates incomplete function definitions."
+                f"Warning: __FunctionParam__ node '{node_id}' remains in the workflow. This indicates incomplete function definitions."
             )
 
     return pruned_workflow, warnings
-
 
 
 if __name__ == "__main__":

@@ -7,8 +7,10 @@ import io
 import hashlib
 from typing import Dict, Any, List, Union
 
+
 class WorkflowExecutionError(Exception):
     """自定义异常，用于表示 ComfyUI 工作流执行期间的错误。"""
+
     def __init__(self, message, node_id, node_type, exception_message):
         super().__init__(message)
         self.node_id = node_id
@@ -23,6 +25,7 @@ class ComfyClient:
     """
     一个用于与 ComfyUI 服务器交互的客户端。
     """
+
     def __init__(self, server_base: str, timeout: int = 600):
         """
         初始化 ComfyClient。
@@ -32,7 +35,7 @@ class ComfyClient:
         """
         self.server_base = server_base
         self.timeout = timeout
-        self.base_url = server_base.rstrip('/')
+        self.base_url = server_base.rstrip("/")
         ws_base = self.base_url.replace("http://", "ws://").replace("https://", "wss://")
         self.ws_url = f"{ws_base}/ws"
 
@@ -45,22 +48,22 @@ class ComfyClient:
         :return: 服务器上保存的文件名。
         """
         image_bytes = io.BytesIO()
-        image.save(image_bytes, format='PNG')
+        image.save(image_bytes, format="PNG")
         image_bytes.seek(0)
 
         hash = hashlib.sha256(image_bytes.getvalue()).hexdigest()
         filename = f"{hash}.png"
         image_bytes.seek(0)
-        
+
         form_data = aiohttp.FormData()
-        form_data.add_field('image', image_bytes, filename=filename, content_type='image/png')
-        form_data.add_field('type', 'input')
-        form_data.add_field('overwrite', 'true')
+        form_data.add_field("image", image_bytes, filename=filename, content_type="image/png")
+        form_data.add_field("type", "input")
+        form_data.add_field("overwrite", "true")
 
         async with session.post(f"{self.base_url}/upload/image", data=form_data) as response:
             response.raise_for_status()
             result = await response.json()
-            return result['name']
+            return result["name"]
 
     async def _get_image(self, filename: str, subfolder: str, folder_type: str, session: aiohttp.ClientSession) -> Image.Image:
         """
@@ -86,29 +89,28 @@ class ComfyClient:
         :return: (输入节点映射, 输出节点映射) 元组。
         """
         input_map = {}  # key: placeholder_name, value: node_id
-        output_map = {} # key: node_id, value: placeholder_name
+        output_map = {}  # key: node_id, value: placeholder_name
 
         for node_id, node_data in workflow.items():
             meta_title = node_data.get("_meta", {}).get("title")
-            if meta_title and meta_title.startswith('%') and meta_title.endswith('%'):
-                name = meta_title.strip('%')
+            if meta_title and meta_title.startswith("%") and meta_title.endswith("%"):
+                name = meta_title.strip("%")
                 # 假设所有带 % 标记的节点都可能是输出
                 output_map[node_id] = name
                 # 如果节点类型是基本类型或 LoadImage，则认为是输入
-                if node_data['class_type'] in [
-                    "PrimitiveBoolean", "PrimitiveFloat", "PrimitiveInt", 
-                    "PrimitiveString", "PrimitiveStringMultiline", "LoadImage"
+                if node_data["class_type"] in [
+                    "PrimitiveBoolean",
+                    "PrimitiveFloat",
+                    "PrimitiveInt",
+                    "PrimitiveString",
+                    "PrimitiveStringMultiline",
+                    "LoadImage",
                 ]:
                     input_map[name] = node_id
-        
+
         return input_map, output_map
-    
-    async def _prepare_workflow(
-        self, 
-        workflow: dict, 
-        session: aiohttp.ClientSession, 
-        **kwargs
-    ) -> tuple[dict, dict]:
+
+    async def _prepare_workflow(self, workflow: dict, session: aiohttp.ClientSession, **kwargs) -> tuple[dict, dict]:
         """
         准备工作流：验证并注入参数，处理图片上传。
 
@@ -127,26 +129,28 @@ class ComfyClient:
             node_id = input_map[name]
             node = prepared_workflow[node_id]
 
-            if node['class_type'] == 'LoadImage':
+            if node["class_type"] == "LoadImage":
                 if isinstance(value, str):  # 路径
-                    with open(value, 'rb') as f:
+                    with open(value, "rb") as f:
                         pil_image = Image.open(io.BytesIO(f.read()))
                     filename = await self._upload_image(pil_image, session)
                 elif isinstance(value, Image.Image):
                     filename = await self._upload_image(value, session)
                 else:
                     raise TypeError(f"LoadImage 输入 '{name}' 的类型不受支持: {type(value).__name__}。需要 str (路径) 或 PIL.Image 对象。")
-                node['inputs']['image'] = filename
+                node["inputs"]["image"] = filename
             else:
-                if 'value' not in node['inputs']:
+                if "value" not in node["inputs"]:
                     raise ValueError(f"节点 '{node_id}' ('{name}') 被标记为输入，但在其 inputs 中没有 'value' 字段。")
-                
-                default_value = node['inputs']['value']
-                if not isinstance(value, type(default_value)) and default_value is not None:
-                     raise TypeError(f"输入 '{name}' 的类型不匹配。期望类型: {type(default_value).__name__}, 得到类型: {type(value).__name__}。")
 
-                node['inputs']['value'] = value
-        
+                default_value = node["inputs"]["value"]
+                if not isinstance(value, type(default_value)) and default_value is not None:
+                    raise TypeError(
+                        f"输入 '{name}' 的类型不匹配。期望类型: {type(default_value).__name__}, 得到类型: {type(value).__name__}。"
+                    )
+
+                node["inputs"]["value"] = value
+
         return prepared_workflow, output_map
 
     async def run_workflow(self, workflow: dict, **kwargs) -> Dict[str, List[Any]]:
@@ -158,18 +162,20 @@ class ComfyClient:
         :return: 一个字典，键是输出节点的标题，值是输出内容的列表。
         """
         client_id = str(uuid.uuid4())
-        
+
         async with aiohttp.ClientSession() as session:
             prepared_workflow, output_map = await self._prepare_workflow(workflow, session, **kwargs)
-            
-            async with session.ws_connect(f"{self.ws_url}?clientId={client_id}", timeout=self.timeout, max_msg_size=128*1024*1024) as ws:
+
+            async with session.ws_connect(
+                f"{self.ws_url}?clientId={client_id}", timeout=self.timeout, max_msg_size=128 * 1024 * 1024
+            ) as ws:
                 prompt_payload = {"prompt": prepared_workflow, "client_id": client_id}
                 async with session.post(f"{self.base_url}/prompt", json=prompt_payload) as response:
                     if response.status != 200:
                         error_text = await response.text()
                         raise ConnectionError(f"提交工作流失败: {response.status} {error_text}")
                     queue_data = await response.json()
-                    prompt_id = queue_data['prompt_id']
+                    prompt_id = queue_data["prompt_id"]
 
                 outputs: Dict[str, list] = {name: [] for name in output_map.values()}
                 image_download_tasks = []
@@ -184,39 +190,36 @@ class ComfyClient:
 
                     if msg_data.type == aiohttp.WSMsgType.TEXT:
                         message = msg_data.json()
-                        msg_type = message.get('type')
-                        data = message.get('data', {})
-                        
-                        if data.get('prompt_id') != prompt_id:
+                        msg_type = message.get("type")
+                        data = message.get("data", {})
+
+                        if data.get("prompt_id") != prompt_id:
                             continue
-                        
+
                         # print(f"[*] 收到消息: {msg_type} - {data.get('display_node', '')}")
 
-                        if msg_type == 'execution_error':
+                        if msg_type == "execution_error":
                             raise WorkflowExecutionError(
                                 "工作流执行出错",
-                                node_id=data.get('node_id'),
-                                node_type=data.get('node_type'),
-                                exception_message=data.get('exception_message')
+                                node_id=data.get("node_id"),
+                                node_type=data.get("node_type"),
+                                exception_message=data.get("exception_message"),
                             )
-                        elif msg_type == 'execution_success':
+                        elif msg_type == "execution_success":
                             is_done = True
-                        elif msg_type == 'executing':
-                            current_executing_node = data.get('display_node') or data.get('node')
-                        elif msg_type == 'executed':
-                            node_id = data.get('display_node') or data.get('node')
+                        elif msg_type == "executing":
+                            current_executing_node = data.get("display_node") or data.get("node")
+                        elif msg_type == "executed":
+                            node_id = data.get("display_node") or data.get("node")
                             if node_id in output_map:
                                 output_name = output_map[node_id]
-                                output_data = data.get('output', {})
-                                if 'text' in output_data:
-                                    outputs[output_name].extend(output_data['text'])
-                                if 'images' in output_data:
-                                    for img_info in output_data['images']:
+                                output_data = data.get("output", {})
+                                if "text" in output_data:
+                                    outputs[output_name].extend(output_data["text"])
+                                if "images" in output_data:
+                                    for img_info in output_data["images"]:
                                         task = self._get_image(
-                                            img_info['filename'],
-                                            img_info.get('subfolder', ''),
-                                            img_info['type'],
-                                            session
+                                            img_info["filename"], img_info.get("subfolder", ""), img_info["type"], session
                                         )
                                         image_download_tasks.append((output_name, task))
 
@@ -226,7 +229,7 @@ class ComfyClient:
                             image_data = msg_data.data[8:]  # 去掉8字节头部
                             image = Image.open(io.BytesIO(image_data))
                             outputs[output_name].append(image)
-                    
+
                     elif msg_data.type in (aiohttp.WSMsgType.CLOSE, aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                         is_done = True
 
@@ -234,7 +237,7 @@ class ComfyClient:
                 results = await asyncio.gather(*(task for _, task in image_download_tasks))
                 for i, (output_name, _) in enumerate(image_download_tasks):
                     outputs[output_name].append(results[i])
-            
+
             return {k: v for k, v in outputs.items() if v}
 
     def run_workflow_sync(self, workflow: dict, **kwargs) -> Dict[str, List[Any]]:
@@ -252,9 +255,9 @@ class ComfyClient:
 def _str_to_primitive(s: str) -> Union[bool, int, float, str]:
     """尝试将字符串转换为布尔值、整数或浮点数。"""
     s_lower = s.lower()
-    if s_lower == 'true':
+    if s_lower == "true":
         return True
-    if s_lower == 'false':
+    if s_lower == "false":
         return False
     try:
         return int(s)
@@ -264,38 +267,31 @@ def _str_to_primitive(s: str) -> Union[bool, int, float, str]:
         except ValueError:
             return s
 
+
 def main_cli():
     """命令行接口的主函数。"""
 
     import argparse
     import sys
     from pathlib import Path
-    
+
     parser = argparse.ArgumentParser(
         description="ComfyUI Python 客户端命令行接口。",
-        epilog="工作流的输入参数请使用 '--key=value' 的格式，例如: --prompt=\"a cat\" --steps=25"
+        epilog="工作流的输入参数请使用 '--key=value' 的格式，例如: --prompt=\"a cat\" --steps=25",
     )
     parser.add_argument("workflow_file", help="要执行的工作流 JSON 文件路径。")
-    parser.add_argument(
-        "--output_dir",
-        default="workflow_outputs",
-        help="用于保存输出图片的目录。(默认: workflow_outputs)"
-    )
-    parser.add_argument(
-        "--server",
-        default="http://127.0.0.1:8188",
-        help="ComfyUI 服务器地址。(默认: http://127.0.0.1:8188)"
-    )
+    parser.add_argument("--output_dir", default="workflow_outputs", help="用于保存输出图片的目录。(默认: workflow_outputs)")
+    parser.add_argument("--server", default="http://127.0.0.1:8188", help="ComfyUI 服务器地址。(默认: http://127.0.0.1:8188)")
 
     args, unknown_args = parser.parse_known_args()
 
     # --- 解析动态工作流参数 ---
     workflow_kwargs = {}
     for arg in unknown_args:
-        if not arg.startswith('--'):
+        if not arg.startswith("--"):
             continue
         try:
-            key, value = arg.lstrip('-').split("=", 1)
+            key, value = arg.lstrip("-").split("=", 1)
             workflow_kwargs[key] = _str_to_primitive(value)
         except ValueError:
             parser.error(f"无法解析参数 '{arg}'。请使用 '--key=value' 格式。")
@@ -306,14 +302,14 @@ def main_cli():
     try:
         # --- 准备和执行工作流 ---
         log(f"[*] 正在从 {args.workflow_file} 加载工作流...")
-        with open(args.workflow_file, 'r', encoding='utf-8') as f:
+        with open(args.workflow_file, "r", encoding="utf-8") as f:
             workflow = json.load(f)
 
         client = ComfyClient(args.server)
 
         log(f"[*] 正在连接到 ComfyUI 服务器: {args.server}")
         log(f"[*] 使用以下输入参数执行工作流: {workflow_kwargs}")
-        
+
         results = client.run_workflow_sync(workflow, **workflow_kwargs)
 
         log("[*] 工作流执行完毕。")
@@ -340,6 +336,7 @@ def main_cli():
     except Exception as e:
         log(f"[错误] 执行过程中发生错误: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main_cli()

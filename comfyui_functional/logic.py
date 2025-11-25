@@ -1,11 +1,12 @@
 from .utils import AnyType
 
+
 class LogicalAnd:
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
-                "input1": ("BOOLEAN", ),
+                "input1": ("BOOLEAN",),
                 "input2": ("BOOLEAN", {"lazy": True}),
             }
         }
@@ -14,7 +15,7 @@ class LogicalAnd:
     FUNCTION = "logical_and"
     CATEGORY = "duanyll/functional/logic"
     DESCRIPTION = "Logical AND operation with lazy evaluation. If input1 is False, input2 is not evaluated."
-    
+
     def check_lazy_status(self, input1, input2):
         if input1 is True:
             return ["input2"]
@@ -23,11 +24,11 @@ class LogicalAnd:
 
     def logical_and(self, input1, input2):
         if input1 is True:
-            return (input2 is True, )
+            return (input2 is True,)
         else:
-            return (False, )
-    
-    
+            return (False,)
+
+
 class LogicalOr:
     @classmethod
     def INPUT_TYPES(s):
@@ -37,7 +38,7 @@ class LogicalOr:
                 "input2": ("BOOLEAN", {"lazy": True}),
             }
         }
-        
+
     RETURN_TYPES = ("BOOLEAN",)
     FUNCTION = "logical_or"
     CATEGORY = "duanyll/functional/logic"
@@ -54,7 +55,7 @@ class LogicalOr:
             return (input2 is True,)
         else:
             return (True,)
-        
+
 
 class IfCondition:
     @classmethod
@@ -77,14 +78,14 @@ class IfCondition:
             return ["true_value"]
         else:
             return ["false_value"]
-        
+
     def if_condition(self, condition, true_value, false_value):
         if condition is True:
-            return (true_value, )
+            return (true_value,)
         else:
-            return (false_value, )
-        
-        
+            return (false_value,)
+
+
 NODE_CLASS_MAPPINGS = {
     "LogicalAnd": LogicalAnd,
     "LogicalOr": LogicalOr,

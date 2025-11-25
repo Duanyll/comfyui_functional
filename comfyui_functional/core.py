@@ -50,8 +50,7 @@ class FunctionEnd:
 
     def run(self, return_value, capture):
         raise NotImplementedError(
-            "The Function End node is a marker and should never be executed directly. "
-            "If you see this error, please file a bug report."
+            "The Function End node is a marker and should never be executed directly. If you see this error, please file a bug report."
         )
 
 
@@ -121,9 +120,7 @@ class CallClosure:
         params = []
         for i in range(len(kwargs)):
             params.append(kwargs[f"param_{i}"])
-        graph, output = create_graph_from_closure(
-            closure, params, caller_unique_id=unique_id
-        )
+        graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
         if len(graph) == 0:
             return (output,)
         return {"result": (output,), "expand": graph}
@@ -165,9 +162,7 @@ class IntermidiateCoroutine:
                     "in core.py."
                 )
 
-            graph, output = create_graph_from_closure(
-                closure, params, caller_unique_id=unique_id
-            )
+            graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)
 
             if len(graph) == 0:
                 return_value = output
@@ -190,17 +185,13 @@ class IntermidiateCoroutine:
 class CoroutineNodeBase:
     @classmethod
     def INPUT_TYPES(cls):
-        raise NotImplementedError(
-            "This is an abstract base class and should not be instantiated directly."
-        )
+        raise NotImplementedError("This is an abstract base class and should not be instantiated directly.")
 
     RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
 
     def run_coroutine(self, **kwargs):
-        raise NotImplementedError(
-            "Subclasses must implement the run_coroutine method as a generator."
-        )
+        raise NotImplementedError("Subclasses must implement the run_coroutine method as a generator.")
         yield  # This is just to make this function a generator
 
     def run(self, unique_id, **kwargs):

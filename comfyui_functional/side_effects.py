@@ -7,6 +7,7 @@ from .utils import AnyType
 
 reap_storage = {}
 
+
 class Sow:
     @classmethod
     def INPUT_TYPES(cls):
@@ -17,22 +18,22 @@ class Sow:
                 "tag": ("STRING", {"default": "default", "multiline": False}),
             },
         }
-        
+
     RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/side_effects"
-    
+
     @classmethod
     def IS_CHANGED(cls, signal, value, tag):
         return float("NaN")
-    
+
     def run(self, signal, value, tag):
         global reap_storage
         if not tag in reap_storage:
             reap_storage[tag] = []
         reap_storage[tag].append(value)
         return (signal,)
-    
+
 
 class Reap:
     @classmethod
@@ -43,15 +44,15 @@ class Reap:
                 "tag": ("STRING", {"default": "default", "multiline": False}),
             },
         }
-        
+
     RETURN_TYPES = ("LIST",)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/side_effects"
-    
+
     @classmethod
     def IS_CHANGED(cls, signal, tag):
         return float("NaN")
-    
+
     def run(self, signal, tag):
         global reap_storage
         if tag in reap_storage:
@@ -60,13 +61,13 @@ class Reap:
         else:
             values = []
         return (values,)
-    
-    
+
+
 def reset_reap_storage():
     global reap_storage
     reap_storage = {}
-    
-    
+
+
 class Latch:
     @classmethod
     def INPUT_TYPES(cls):
@@ -76,15 +77,15 @@ class Latch:
                 "value": (AnyType("*"),),
             },
         }
-        
-    RETURN_TYPES = (AnyType("*"), )
+
+    RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/side_effects"
-    
+
     def run(self, signal, value):
-        return (value, )
-    
-    
+        return (value,)
+
+
 class Sleep:
     @classmethod
     def INPUT_TYPES(cls):
@@ -94,16 +95,16 @@ class Sleep:
                 "seconds": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 60.0, "step": 0.1}),
             },
         }
-        
+
     RETURN_TYPES = (AnyType("*"),)
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/side_effects"
-    
+
     def run(self, signal, seconds):
         time.sleep(seconds)
         return (signal,)
-    
-    
+
+
 class Inspect:
     @classmethod
     def INPUT_TYPES(cls):
@@ -113,20 +114,26 @@ class Inspect:
                 "value": (AnyType("*"),),
             }
         }
-        
-    RETURN_TYPES = (AnyType("*"), AnyType("*"),)
+
+    RETURN_TYPES = (
+        AnyType("*"),
+        AnyType("*"),
+    )
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/side_effects"
-    
+
     def run(self, signal, value):
-        return (signal, ExecutionBlocker(
-            "The second output of the Inspect node must be directly connected to an Output "
-            "node without any intermediate nodes. Additionally, the Output node can only "
-            "be connected to the Inspect node and no other nodes. Please check your node "
-            "connections and try again."
-        ))
-    
-    
+        return (
+            signal,
+            ExecutionBlocker(
+                "The second output of the Inspect node must be directly connected to an Output "
+                "node without any intermediate nodes. Additionally, the Output node can only "
+                "be connected to the Inspect node and no other nodes. Please check your node "
+                "connections and try again."
+            ),
+        )
+
+
 class InspectPassthru:
     @classmethod
     def INPUT_TYPES(cls):
@@ -136,15 +143,18 @@ class InspectPassthru:
                 "value": (AnyType("*"),),
             }
         }
-        
-    RETURN_TYPES = (AnyType("*"), AnyType("*"),)
+
+    RETURN_TYPES = (
+        AnyType("*"),
+        AnyType("*"),
+    )
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/internal"
-    
+
     def run(self, signal, value):
         return (signal[0], value[0])
-    
-    
+
+
 class InspectImpl:
     @classmethod
     def INPUT_TYPES(cls):
@@ -156,13 +166,13 @@ class InspectImpl:
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID",
-            }
+            },
         }
-        
+
     RETURN_TYPES = (AnyType("*"), AnyType("*"))
     FUNCTION = "run"
     CATEGORY = "duanyll/functional/internal"
-    
+
     def run(self, signal, value, body, unique_id):
         body = json.loads(body)
         graph = {}
@@ -186,8 +196,8 @@ class InspectImpl:
             "result": ([passthru_id, 0], [passthru_id, 1]),
             "expand": graph,
         }
-        
-    
+
+
 NODE_CLASS_MAPPINGS = {
     "__Sow__": Sow,
     "__Reap__": Reap,
@@ -208,6 +218,4 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Sleep": "Sleep",
 }
 
-SIDE_EFFECT_NODES = [
-    "__Sow__", "__Reap__"
-]
+SIDE_EFFECT_NODES = ["__Sow__", "__Reap__"]

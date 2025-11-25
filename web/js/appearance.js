@@ -11,6 +11,7 @@ const NODE_COLORS = {
     "__FunctionParam__": "core",
     "__FunctionEnd__": "core",
     "duanyll::CallClosure": "core",
+    "duanyll::CallClosureRemote": "core",
 
     "duanyll::HighLevelMap": "high_level",
     "duanyll::HighLevelMapIndexed": "high_level",

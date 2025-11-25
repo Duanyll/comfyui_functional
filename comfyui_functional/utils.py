@@ -6,7 +6,7 @@ import base64
 import numpy as np
 import torch
 from PIL import Image
-import torch.multiprocessing as mp
+
 
 class AnyType(str):
     def __ne__(self, __value: object) -> bool:
@@ -27,17 +27,14 @@ class ContainsDynamicDict(dict):
         self._dynamic_prefixes = {
             key.rstrip("0123456789"): value
             for key, value in self.items()
-            if isinstance(value, tuple)
-            and len(value) > 1
-            and value[1].get("_dynamic") == "number"
+            if isinstance(value, tuple) and len(value) > 1 and value[1].get("_dynamic") == "number"
         }
 
     def __contains__(self, key):
         # Check if key matches a dynamically handled prefix or exists normally
-        return any(
-            key.startswith(prefix) and key[len(prefix) :].isdigit()
-            for prefix in self._dynamic_prefixes
-        ) or super().__contains__(key)
+        return any(key.startswith(prefix) and key[len(prefix) :].isdigit() for prefix in self._dynamic_prefixes) or super().__contains__(
+            key
+        )
 
     def __getitem__(self, key):
         # Dynamically return the value for keys matching a `prefix<number>` pattern
@@ -53,27 +50,25 @@ class Closure(TypedDict):
     captures: list
     output: list
 
+
 def create_graph_from_closure(closure: Closure, params, caller_unique_id=None):
     body = copy.deepcopy(closure["body"])
     graph = {}
-    
+
     def transform_input(spec):
         if not isinstance(spec, list):
             return spec
         # Return normal spec if not a capture or param
+        prefix = f"{caller_unique_id}_" if caller_unique_id is not None else ""
         if spec[0] != "__capture" and spec[0] != "__param":
-            return spec
+            return [f"{prefix}{spec[0]}", spec[1]]
         if spec[0] == "__param":
             if spec[1] >= len(params):
-                raise IndexError(
-                    f"Parameter index {spec[1]} out of range for function call. "
-                    f"Only {len(params)} parameters were provided."
-                )
+                raise IndexError(f"Parameter index {spec[1]} out of range for function call. Only {len(params)} parameters were provided.")
             value = params[spec[1]]
         else:
             value = closure["captures"][spec[1]]
         if isinstance(value, list):
-            prefix = f"{caller_unique_id}_" if caller_unique_id is not None else ""
             recover_id = f"{prefix}{spec[0]}_{spec[1]}"
             if recover_id not in graph:
                 graph[recover_id] = {
@@ -86,18 +81,18 @@ def create_graph_from_closure(closure: Closure, params, caller_unique_id=None):
             return [recover_id, 0]
         else:
             return value
-    
+
     for node_id, node_data in body.items():
         inputs = node_data["inputs"]
         for key in inputs.keys():
             inputs[key] = transform_input(inputs[key])
         node_data["override_display_id"] = node_id
         graph[f"{caller_unique_id}_{node_id}"] = node_data
-    
+
     output = transform_input(closure["output"])
     return graph, output
-    
-    
+
+
 def create_remote_workflow_from_closure(closure, params, use_shared_memory=False):
     body = copy.deepcopy(closure["body"])
     graph = {}
@@ -108,23 +103,20 @@ def create_remote_workflow_from_closure(closure, params, use_shared_memory=False
         # Return normal spec if not a capture or param
         if spec[0] != "__capture" and spec[0] != "__param":
             return spec
-        
+
         # Check if we have already created a deserialize node for this spec
         deserialize_node_id = f"deserialize_{spec[0]}_{spec[1]}"
         if deserialize_node_id in graph:
             return [deserialize_node_id, 0]
-        
+
         # Try to create a deserialize node
         if spec[0] == "__param":
             if spec[1] >= len(params):
-                raise IndexError(
-                    f"Parameter index {spec[1]} out of range for function call. "
-                    f"Only {len(params)} parameters were provided."
-                )
+                raise IndexError(f"Parameter index {spec[1]} out of range for function call. Only {len(params)} parameters were provided.")
             value = params[spec[1]]
         else:
             value = closure["captures"][spec[1]]
-        
+
         try:
             serialized_value, _ = serialize(value, use_shared_memory=use_shared_memory)
             graph[deserialize_node_id] = {
@@ -148,26 +140,22 @@ def create_remote_workflow_from_closure(closure, params, use_shared_memory=False
                     "Parameters must be serializable to be used in remote execution. "
                     f"Error: {e}"
                 )
-            
+
     for node_id, node_data in body.items():
         inputs = node_data["inputs"]
         for key in inputs.keys():
             inputs[key] = transform_input(inputs[key])
         graph[node_id] = node_data
-        
+
     output = transform_input(closure["output"])
     graph["__output__"] = {
-        "inputs": {
-            "data": output,
-            "use_shared_memory": use_shared_memory
-        },
+        "inputs": {"data": output, "use_shared_memory": use_shared_memory},
         "class_type": "__Serialize__",
-        "_meta": {
-            "title": "%__output__%"
-        }
+        "_meta": {"title": "%__output__%"},
     }
-    
+
     return graph
+
 
 class WhitelistEncoder(json.JSONEncoder):
     def __init__(self, use_shared_memory=False, *args, **kwargs):
@@ -178,19 +166,19 @@ class WhitelistEncoder(json.JSONEncoder):
     def default(self, obj):
         # 区分 set 和 tuple
         if isinstance(obj, set):
-            return {'__type__': 'set', 'data': list(obj)}
+            return {"__type__": "set", "data": list(obj)}
         if isinstance(obj, tuple):
-            return {'__type__': 'tuple', 'data': list(obj)}
-        
+            return {"__type__": "tuple", "data": list(obj)}
+
         if isinstance(obj, bytes):
-            return {'__type__': 'bytes', 'data': base64.b64encode(obj).decode('utf-8')}
+            return {"__type__": "bytes", "data": base64.b64encode(obj).decode("utf-8")}
 
         if isinstance(obj, np.ndarray):
             buffer = io.BytesIO()
-            np.save(buffer, obj, allow_pickle=False) 
+            np.save(buffer, obj, allow_pickle=False)
             return {
-                '__type__': 'numpy.ndarray',
-                'data': base64.b64encode(buffer.getvalue()).decode('utf-8')
+                "__type__": "numpy.ndarray",
+                "data": base64.b64encode(buffer.getvalue()).decode("utf-8"),
             }
 
         if isinstance(obj, torch.Tensor):
@@ -202,31 +190,31 @@ class WhitelistEncoder(json.JSONEncoder):
                 manager_handle_bytes, handle_bytes, storage_size = storage._share_filename_cpu_()
                 self.shared_tensors.add(obj)
                 return {
-                    '__type__': 'torch.Tensor_shared',
-                    'manager_handle': manager_handle_bytes.decode('utf-8'),
-                    'handle': handle_bytes.decode('utf-8'),
-                    'storage_size': storage_size,
-                    'offset': obj.storage_offset(),
-                    'shape': list(obj.shape),
-                    'strides': list(obj.stride()),
-                    'dtype': str(obj.dtype),
-                    'requires_grad': obj.requires_grad
+                    "__type__": "torch.Tensor_shared",
+                    "manager_handle": manager_handle_bytes.decode("utf-8"),
+                    "handle": handle_bytes.decode("utf-8"),
+                    "storage_size": storage_size,
+                    "offset": obj.storage_offset(),
+                    "shape": list(obj.shape),
+                    "strides": list(obj.stride()),
+                    "dtype": str(obj.dtype),
+                    "requires_grad": obj.requires_grad,
                 }
             else:
                 # 普通序列化（回退）
                 buffer = io.BytesIO()
                 torch.save(obj, buffer)  # 确保 CPU
                 return {
-                    '__type__': 'torch.Tensor',
-                    'data': base64.b64encode(buffer.getvalue()).decode('utf-8')
+                    "__type__": "torch.Tensor",
+                    "data": base64.b64encode(buffer.getvalue()).decode("utf-8"),
                 }
 
         if isinstance(obj, Image.Image):
             buffer = io.BytesIO()
-            obj.save(buffer, format='PNG')
+            obj.save(buffer, format="PNG")
             return {
-                '__type__': 'PIL.Image',
-                'data': base64.b64encode(buffer.getvalue()).decode('utf-8')
+                "__type__": "PIL.Image",
+                "data": base64.b64encode(buffer.getvalue()).decode("utf-8"),
             }
 
         raise TypeError(
@@ -235,57 +223,57 @@ class WhitelistEncoder(json.JSONEncoder):
             "torch.Tensor, and PIL.Image are allowed."
         )
 
+
 def whitelist_decoder(dct):
     """
     用于 json.load/loads 的 object_hook，用于恢复自定义类型。
     """
-    if '__type__' in dct:
-        obj_type = dct['__type__']
-        data = dct.get('data')
+    if "__type__" in dct:
+        obj_type = dct["__type__"]
+        data = dct.get("data")
 
-        if obj_type == 'set':
+        if obj_type == "set":
             return set(data)
-        if obj_type == 'tuple':
+        if obj_type == "tuple":
             return tuple(data)
-        if obj_type == 'bytes':
+        if obj_type == "bytes":
             return base64.b64decode(data)
 
-        if obj_type == 'numpy.ndarray':
+        if obj_type == "numpy.ndarray":
             buffer = io.BytesIO(base64.b64decode(data))
-            return np.load(buffer, allow_pickle=True) 
+            return np.load(buffer, allow_pickle=True)
 
-        if obj_type == 'torch.Tensor':
+        if obj_type == "torch.Tensor":
             buffer = io.BytesIO(base64.b64decode(data))
             return torch.load(buffer)
 
-        if obj_type == 'torch.Tensor_shared':
+        if obj_type == "torch.Tensor_shared":
             # 重建共享 Tensor
-            manager_handle_bytes = dct['manager_handle'].encode('utf-8')
-            handle_bytes = dct['handle'].encode('utf-8')
-            storage_size = dct['storage_size']
-            offset = dct['offset']
-            shape = tuple(dct['shape'])
-            strides = tuple(dct['strides'])
-            dtype_str = dct['dtype'].split('.')[-1]  # 如 'float32'
+            manager_handle_bytes = dct["manager_handle"].encode("utf-8")
+            handle_bytes = dct["handle"].encode("utf-8")
+            storage_size = dct["storage_size"]
+            offset = dct["offset"]
+            shape = tuple(dct["shape"])
+            strides = tuple(dct["strides"])
+            dtype_str = dct["dtype"].split(".")[-1]  # 如 'float32'
             dtype = getattr(torch, dtype_str)
-            requires_grad = dct['requires_grad']
-            
+            requires_grad = dct["requires_grad"]
+
             # 重建存储（attach 到共享内存）
-            storage = torch.UntypedStorage._new_shared_filename_cpu(
-                manager_handle_bytes, handle_bytes, storage_size
-            )
-            
+            storage = torch.UntypedStorage._new_shared_filename_cpu(manager_handle_bytes, handle_bytes, storage_size)
+
             # 创建 Tensor 视图
             tensor = torch.empty(shape, dtype=dtype).set_(storage, offset, shape, strides)
             tensor.requires_grad_(requires_grad)
             return tensor
 
-        if obj_type == 'PIL.Image':
+        if obj_type == "PIL.Image":
             buffer = io.BytesIO(base64.b64decode(data))
             img = Image.open(buffer)
-            return img.copy() 
-            
+            return img.copy()
+
     return dct
+
 
 def serialize(obj, use_shared_memory=False):
     """
@@ -295,6 +283,7 @@ def serialize(obj, use_shared_memory=False):
     """
     encoder = WhitelistEncoder(use_shared_memory=use_shared_memory)
     return encoder.encode(obj), encoder.shared_tensors
+
 
 def deserialize(json_str):
     """
