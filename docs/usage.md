@@ -61,6 +61,84 @@ To implement loops or other flow control primitives, rely on the high-order node
 
 Implementation hint: the nodes rely on Python coroutines. Take a look at `comfyui_functional/high_level.py` and `CoroutineNodeBase` if you want to add your own high-order helpers.
 
+## Remote Function Calls
+
+The **Call Remote Function** node lets you execute a function on another ComfyUI instance—either on a different GPU on the same machine or on a completely separate server. This is useful for:
+
+- **Pipeline parallelism**: Run different stages of your workflow on different hardware simultaneously.
+- **Avoiding model swapping**: Keep large models loaded on dedicated workers instead of loading/unloading them repeatedly on one GPU.
+- **Distributed rendering**: Spread batch processing across multiple machines.
+
+### Setting Up Remote Calls
+
+1. Start a ComfyUI server on the remote machine (or a second instance locally on a different port/GPU).
+2. Replace **Call Function** with **Call Remote Function**.
+3. Provide the `base_url` of the remote ComfyUI server (e.g., `http://192.168.1.100:8188` or `http://localhost:8189`).
+4. Set `timeout` to an appropriate value for your workload.
+5. Enable `use_shared_memory` if both instances run on the same machine and you want to avoid tensor serialization overhead.
+
+### Capture vs. No-Capture Mode
+
+Understanding the difference between local and remote function calls is critical:
+
+| Aspect | Local Function (`Call Function`) | Remote Function (`Call Remote Function`) |
+| --- | --- | --- |
+| **Capture mode** | Enabled by default; nodes not depending on parameters are evaluated once and reused | Must be **disabled** (`capture = False` on `Function End`) |
+| **Model loading** | Load models outside the function; they get captured | Load models **inside** the function body |
+| **Caching** | Node IDs change per call, so ComfyUI cache doesn't help | Node IDs stay consistent, ComfyUI cache works normally |
+| **Serialization** | Not needed; values passed by reference | Parameters and return values must be serializable |
+
+**Why disable capture for remote calls?**
+
+- Captured values (like loaded models) must be serialized and sent over the network.
+- Models, samplers, and other complex objects cannot be serialized.
+- By disabling capture, model loaders stay inside the function body and run on the remote server.
+- Since remote calls don't reassign node IDs, the remote ComfyUI instance can cache the loaded models between calls.
+
+### Example: Remote Image Generation
+
+```
+[Local Machine]                          [Remote GPU Server]
+
+┌──────────────┐
+│ Encode Prompt│
+└──────┬───────┘
+       │ (conditioning)
+       ▼
+┌──────────────────────┐    HTTP/WS     ┌─────────────────────────┐
+│ Call Remote Function │ ─────────────→ │ Function Body:          │
+│   base_url: ...      │                │   Load Checkpoint       │
+│   param_0: cond      │                │   KSampler              │
+│   param_1: seed      │                │   VAE Decode            │
+└──────────┬───────────┘ ←───────────── │   (returns IMAGE)       │
+           │ (image)                     └─────────────────────────┘
+           ▼
+┌──────────────┐
+│  Save Image  │
+└──────────────┘
+```
+
+### Serialization Support
+
+The following types can be passed as parameters or returned from remote functions:
+
+- Basic Python types: `int`, `float`, `str`, `bool`, `list`, `dict`, `set`, `tuple`
+- Binary data: `bytes`
+- NumPy arrays: `numpy.ndarray`
+- PyTorch tensors: `torch.Tensor` (CPU only; GPU tensors are moved to CPU automatically)
+- PIL images: `PIL.Image`
+
+Types that **cannot** be serialized (and must stay inside the remote function body):
+- Models (checkpoints, VAE, CLIP, ControlNet, etc.)
+- Samplers and schedulers
+- Custom objects without explicit serialization support
+
+### Shared Memory Optimization
+
+When both ComfyUI instances run on the same physical machine, enable `use_shared_memory` to pass PyTorch tensors via shared memory instead of JSON serialization. This dramatically reduces overhead for large tensors (images, latents).
+
+> Note: Shared memory only works for CPU tensors on the same machine. Cross-machine calls always use standard serialization.
+
 ## Using Side Effects Safely
 
 Some situations call for side effects (logging, collecting intermediate results, pacing execution). The following nodes make that practical:

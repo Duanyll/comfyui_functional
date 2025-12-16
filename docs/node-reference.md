@@ -7,8 +7,29 @@ This document complements the [Usage Guide](./usage.md) with node-by-node detail
 | Node | Description | Tips |
 | --- | --- | --- |
 | `Function Parameter` | Declares a positional parameter. The label and optional index determine the parameter order. | You can rename each node to clarify semantics (e.g., `mask`, `strength`). |
-| `Function End` | Marks the return value of the function body. | Only one output is supported; bundle extra values into a `LIST`. |
-| `Call Function` | Executes a function object and returns its output. | Connect parameters in the exact order created by Function Parameter nodes. |
+| `Function End` | Marks the return value of the function body. Set `capture` to control whether non-parameter-dependent nodes are captured or serialized. | Only one output is supported; bundle extra values into a `LIST`. Disable `capture` for remote function calls. |
+| `Call Function` | Executes a function object locally and returns its output. | Connect parameters in the exact order created by Function Parameter nodes. |
+| `Call Remote Function` | Executes a function on a remote ComfyUI instance. | Requires `capture=False` on `Function End`. See below for details. |
+
+### Call Remote Function
+
+Executes the function body on another ComfyUI server, enabling distributed workflows and pipeline parallelism.
+
+**Inputs:**
+
+| Input | Type | Description |
+| --- | --- | --- |
+| `closure` | CLOSURE | The function to execute remotely. |
+| `base_url` | STRING | URL of the remote ComfyUI server (e.g., `http://192.168.1.100:8188`). |
+| `timeout` | FLOAT | Maximum time (seconds) to wait for the remote execution. Default: 600. |
+| `use_shared_memory` | BOOLEAN | Use shared memory for tensor passing (same-machine only). Default: False. |
+| `param_0`, `param_1`, ... | ANY | Function parameters, must be serializable types. |
+
+**Important notes:**
+
+- The `Function End` node must have `capture` set to `False`.
+- Parameters and return values must be serializable: basic types, `bytes`, `numpy.ndarray`, `torch.Tensor`, `PIL.Image`.
+- Since node IDs are preserved in remote calls, the remote ComfyUI instance can cache results effectively.
 
 ## High-Order Nodes
 
@@ -52,3 +73,5 @@ All high-order nodes accept function objects in their first socket. They rely on
 - All nodes expect `LIST` data structures from the Basic Data Handling pack. Passing ComfyUI Data Lists will deadlock the graph.
 - The scheduler hacks that make repeated execution possible may disable caching. Budget extra runtime whenever you lean on side effects.
 - ComfyUI updates can invalidate assumptions about evaluation order. Test after every upgrade and file issues with reproduction workflows when possible.
+- Remote function calls require all parameters and return values to be serializable. Models, samplers, and other complex ComfyUI objects must stay inside the remote function body.
+- Shared memory optimization for remote calls only works when both ComfyUI instances run on the same physical machine.

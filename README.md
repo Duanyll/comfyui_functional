@@ -13,6 +13,7 @@ Functional programming primitives for ComfyUI graphs: define functions inline, c
 
 - **Function definitions inside graphs** – Drop `Function Parameter` and `Function End` nodes to encapsulate any node subgraph. Call it repeatedly or pass it to other nodes just like a Python closure.
 - **Reusable, composable control flow** – `Map`, `Fold`, `Nest`, `Select`, and friends let you describe loops and branching logic without custom Python code. Bring your own functions as inputs.
+- **Remote function calls** – Execute parts of your workflow on other ComfyUI instances (different GPUs or machines) with `Call Remote Function`. Great for pipeline parallelism and avoiding repeated model loading/unloading overhead.
 - **Side-effect helpers** – `Sow`, `Reap`, `Inspect`, and `Sleep` make it possible to log data, accumulate results, and debug execution order when building complex flows.
 - **Interop with other packs** – Pairs especially well with [Basic Data Handling](https://github.com/StableLlama/ComfyUI-basic_data_handling); use its `LIST` values whenever you pass arrays through the functional nodes.
 
@@ -53,6 +54,16 @@ Use the high-order nodes under `duanyll/functional/high_order` to iterate over l
 See [`docs/node-reference.md`](./docs/node-reference.md) for the full signature cheat sheet.
 
 ![Mapping across a list](https://img.duanyll.com/img/1459c201.png)
+
+### Remote function calls
+
+Replace `Call Function` with `Call Remote Function` to execute the function body on another ComfyUI instance:
+
+- **Pipeline parallelism** – Distribute different stages of your workflow across multiple GPUs or machines.
+- **Avoid model reloading** – Keep large models loaded on dedicated workers instead of swapping them in and out on a single GPU.
+- **Shared memory optimization** – When calling functions on the same machine, enable shared memory to pass tensors without serialization overhead.
+
+> ⚠️ Remote functions require the `capture` option on `Function End` to be **disabled**. Models and other non-serializable objects cannot be captured; instead, place model loaders inside the function body. This also means ComfyUI's cache works correctly for remote calls since node IDs stay consistent.
 
 ### Side effects and debugging
 
