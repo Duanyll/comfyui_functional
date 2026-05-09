@@ -1,11 +1,12 @@
+import os
 import json
 
 from comfy_execution.graph_utils import ExecutionBlocker
 
 from .utils import AnyType, ContainsDynamicDict, Closure, create_graph_from_closure
 
-RECURISON_LIMIT = 50
-COROUTINE_LIMIT = 100
+RECURISON_LIMIT = int(os.getenv("COMFYUI_FUNCTIONAL_RECURSION_LIMIT", "100"))
+COROUTINE_LIMIT = int(os.getenv("COMFYUI_FUNCTIONAL_COROUTINE_LIMIT", "100"))
 
 
 class FunctionParam:
@@ -114,7 +115,7 @@ class CallClosure:
             raise RecursionError(
                 "Function call recursion limit exceeded. Possible infinite recursion "
                 "detected. If you are intentionally using deep recursion, you can increase "
-                "the limit by editing the RECURSION_LIMIT variable in core.py."
+                "the limit by setting the COMFYUI_FUNCTIONAL_RECURSION_LIMIT environment variable."
             )
         # kwargs: param_0, param_1, ...
         params = []
@@ -158,8 +159,7 @@ class IntermidiateCoroutine:
                 raise RecursionError(
                     "Coroutine execution limit exceeded. Possible infinite loop "
                     "detected. If you are intentionally using long-running coroutines, "
-                    "you can increase the limit by editing the COROUTINE_LIMIT variable "
-                    "in core.py."
+                    "you can increase the limit by setting the COMFYUI_FUNCTIONAL_COROUTINE_LIMIT environment variable."
                 )
 
             graph, output = create_graph_from_closure(closure, params, caller_unique_id=unique_id)

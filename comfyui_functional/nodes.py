@@ -1,9 +1,9 @@
-from . import core, high_level, logic, side_effects, remote
+from . import core, high_level, logic, side_effects, remote, code
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-for module in [core, high_level, logic, side_effects, remote]:
+for module in [core, high_level, logic, side_effects, remote, code]:
     NODE_CLASS_MAPPINGS.update(module.NODE_CLASS_MAPPINGS)
     NODE_DISPLAY_NAME_MAPPINGS.update(module.NODE_DISPLAY_NAME_MAPPINGS)
 

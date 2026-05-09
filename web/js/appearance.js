@@ -5,6 +5,7 @@ const COLOR_THEMES = {
     high_level: { nodeColor: "#2e3e57", nodeBgColor: "#4b5b73" },
     side_effect: { nodeColor: "#3e2e40", nodeBgColor: "#573647" },
     logic: { nodeColor: "#6b4b0d", nodeBgColor: "#59430a" },
+    danger: { nodeColor: "#6b0d0d", nodeBgColor: "#591010" },
 };
 
 const NODE_COLORS = {
@@ -31,6 +32,8 @@ const NODE_COLORS = {
     "duanyll::LogicalAnd": "logic",
     "duanyll::LogicalOr": "logic",
     "duanyll::IfCondition": "logic",
+
+    "duanyll::PythonExec": "danger",
 };
 
 function setNodeColors(node, theme) {

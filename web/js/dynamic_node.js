@@ -41,7 +41,8 @@ const escapeRegExp = (string) => {
 
 const COMFY_CLASSES = [
     "__CreateClosure__",
-    "duanyll::CallClosure"
+    "duanyll::CallClosure",
+    "duanyll::PythonExec"
 ]
 
 
